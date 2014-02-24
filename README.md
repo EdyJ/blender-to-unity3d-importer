@@ -4,7 +4,7 @@ Blender to Unity 3D importer
 An advanced Blender model importer for Unity 3D
 
 Version: 1.0  
-By Angel García "Edy"
+By Angel García "Edy"  
 http://www.edy.es
 
 ### Setting up
