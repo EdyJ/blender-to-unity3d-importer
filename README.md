@@ -45,6 +45,7 @@ The [importer] string allows additional parameters as keywords separated by a do
 	NOZFIX			Do not fix Z direction in .blend files. "Forward" should be Z+ in Unity (Y+ in Blender).
 	NOANIMFIX		Do not fix animation clips in .blend files when imported.
 	NOFLOATFIX		Do not fix floating point precision errors (i.e. rounding 0.9999998 to 1)
+	FORCEROOTFIX	Fixes an specific case of Blender file. See Known Issues below for details.
 
 #### Selective commands to meshes
 
@@ -78,10 +79,15 @@ Alt-P clears the parent's inverse transform in a children when the parenthood wa
 
 Unity applies Euler rotations in this order: ZXY
 
-In Blender, the euler rotation mode that matches Unity is: "YXZ Euler" (Z and Y axis are exchanged). Still, you can use any rotation mode in Blender. The result of the rotation will be preserved, with the Euler angles in Unity adjusted accordingly.
+In Blender, the euler rotation mode that matches Unity is: "YXZ Euler" (Z and Y axis are exchanged). 
+Still, you can use any rotation mode in Blender. The result of the rotation will be preserved, with 
+the Euler angles in Unity adjusted accordingly.
 
-All transformations (position, rotation, scale) will look in Unity exactly as seen in Blender, provided the parenthood relationships have been established as speficied above. Only the specific values will be different as result of the coordinate change (axis exchanged, etc).
+All transformations (position, rotation, scale) will look in Unity exactly as seen in Blender, 
+provided the parenthood relationships have been established as speficied above. Only the specific 
+values will be different as result of the coordinate change (axis exchanged, etc).
 
 ### Known issues
 
-Rotations are incorrectly imported when the Blender file contains big meshes (>65535 tris) that are split by Unity 3D after importing.
+Rotations are incorrectly imported when the Blender file contains a single Empty object as root for 
+all other objects. Use the FORCEROOTFIX option in this case.

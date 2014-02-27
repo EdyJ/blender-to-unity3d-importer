@@ -27,9 +27,10 @@ public class EdysBlenderImporter : AssetPostprocessor
 	private bool m_animFix = true;
 	private bool m_floatFix = true;
 	private bool m_postMods = true;
+	private bool m_forceFixRoot = false;
 	
 	private float m_floatFixThreshold = 1.53e-05f;
-
+	
 	
     void OnPostprocessModel (GameObject go)
 		{
@@ -61,6 +62,7 @@ public class EdysBlenderImporter : AssetPostprocessor
 				case "noanimfix": m_animFix = false; break;
 				case "nofloatfix": m_floatFix = false; break;
 				case "nomods": m_postMods = false; break;
+				case "forcefixroot": m_forceFixRoot = true; break;
 				
 				default: 
 					token = "";
@@ -145,28 +147,41 @@ public class EdysBlenderImporter : AssetPostprocessor
 		
 	// Gameobject processing -----------------------------------------------------------------------
 	
-		
+	
 	void ProcessBlenderObject (GameObject go)
 		{
-		// If the Blender file contains multiple first-level objects they are imported
-		// as a single parent with the name of the Blender file and all objects as children.
+		// A) If there's only one first-level object then it gets imported as a single object
+		// containing the mesh (MeshFilter). This object is rotated X-90.
 		//
-		// If there's only one first-level object then it's imported as a single object
-		// named as the Blender file.
+		// B) If the Blender file contains multiple first-level objects then they are imported
+		// as a single empty parent (no mesh) with all objects as children. The parent is NOT
+		// rotated in this case, but all the first-level children are.
 		
-		if (go.transform.childCount == 0)
+		if (m_forceFixRoot || go.GetComponent<MeshFilter>() != null || IsMultipartObject(go))
 			{
+			// Case A: Root object has been rotated X-90
+			
+			LogInfo("Fixing X-90 rotation in root object...");
+			
 			ProcessFirstLevel(go);
 			ProcessChildren(go);
 			}
 		else
 			{
+			// Case B: First-level objects have been rotated X-90, not the root
+			
+			LogInfo(string.Format("Fixing X-90 rotation in {0} objects...", go.transform.childCount));
+			
 			foreach (Transform child in go.transform)
 				{
 				ProcessFirstLevel(child.gameObject);
 				ProcessChildren(child.gameObject);
 				}
 			}
+			
+		// Fix animations.
+		// Objects that have been fixed for X-90 are always imported as first-level objects
+		// in the animation clips.
 		
 		if (m_animFix)
 			ProcessAnimations(go);
@@ -175,7 +190,7 @@ public class EdysBlenderImporter : AssetPostprocessor
 		
 	void ProcessFirstLevel (GameObject go)
 		{
-		// Fix the -90 rotation in the first level objects
+		// Fix the X-90 rotation in the first level objects
 		
 		go.transform.Rotate(Vector3.right, 90.0f);
 		RotateMesh(go, Quaternion.AngleAxis(-90.0f, Vector3.right));
@@ -274,6 +289,22 @@ public class EdysBlenderImporter : AssetPostprocessor
 	// Object manipulation functions ---------------------------------------------------------------
 	
 	
+	bool IsMultipartObject (GameObject go)
+		{
+		// An object has been subdivided by Unity when it doesn't contain a mesh 
+		// and the names of all its childer end with "_MeshPart<n>".
+		// Example: _MeshPart0, _MeshPart1, _MeshPart2...
+		
+		foreach (Transform child in go.transform)
+			{
+			if (!child.gameObject.name.TrimEnd("0123456789".ToCharArray()).EndsWith("_MeshPart"))
+				return false;
+			}
+		
+		return true;
+		}
+		
+		
 	void ApplyPostModifiers (GameObject go)
 		{
 		string name = go.name.ToLowerInvariant();
