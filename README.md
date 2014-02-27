@@ -17,7 +17,7 @@ Rename the model to include the string [importer] in the name or path (case inse
 
     Assets/Models/Scenery/Big House [importer].blend
 
-The [importer] string can be used in a path. All contained Blender files are imported:
+The [importer] string can be used in a path. All contained 3D files are processed:
 
     Assets/Models/Player Vehicles [IMPORTER]/Car1.blend
 
@@ -82,3 +82,6 @@ In Blender, the euler rotation mode that matches Unity is: "YXZ Euler" (Z and Y 
 
 All transformations (position, rotation, scale) will look in Unity exactly as seen in Blender, provided the parenthood relationships have been established as speficied above. Only the specific values will be different as result of the coordinate change (axis exchanged, etc).
 
+### Known issues
+
+Rotations are incorrectly imported when the Blender file contains big meshes (>65535 tris) that are split by Unity 3D after importing.
