@@ -5,9 +5,7 @@ Blender to Unity 3D importer
 An advanced Blender model importer for Unity 3D
 https://github.com/EdyJ/blender-to-unity3d-importer
 
-Version: 1.0
 By Angel García "Edy" 
-
 http://www.edy.es
 */
 
@@ -41,11 +39,11 @@ public class EdysBlenderImporter : AssetPostprocessor
 		// Imported objects can be located in a subfolder named with the import commands.
 		// If both path and file are used then the last one has preference.
 		
-		int i1 = filePath.LastIndexOf("["[0]);
-		int i2 = filePath.LastIndexOf("]"[0]);
+		int i1 = filePath.LastIndexOf('[');
+		int i2 = filePath.LastIndexOf(']');
 		if (i1 < 0 || i2 < 0 || i1 >= i2) return;
 		
-		string[] tokens = filePath.Substring(i1+1, i2-i1-1).Split("."[0]);
+		string[] tokens = filePath.Substring(i1+1, i2-i1-1).Split('.');
 		if (tokens.Length == 0 || tokens[0] != "importer") return;
 		
 		string options = "";
@@ -56,7 +54,8 @@ public class EdysBlenderImporter : AssetPostprocessor
 			
 			switch (token)
 				{
-				case "noblenderfix": m_fixBlender = false; break;
+				case "skipfix": m_fixBlender = false; break;
+				case "forcefix": m_fixBlender = true; break;
 				case "opt": m_optimize = true; break;
 				case "nozfix": m_zFix = false; break;
 				case "noanimfix": m_animFix = false; break;
@@ -123,7 +122,7 @@ public class EdysBlenderImporter : AssetPostprocessor
 		
 		MeshFilter[] meshes = GameObject.FindObjectsOfType<MeshFilter>();
 		
-		LogInfo(string.Format("{0} meshes found in the scene.", meshes.Length));
+		LogInfo(string.Format("{0} meshes found in the scene. Searching for duplicates...", meshes.Length));
 		LogInfo("Click for details");
 		
 		OptimizeMeshes(meshes);
@@ -139,7 +138,7 @@ public class EdysBlenderImporter : AssetPostprocessor
 		OptimizeMeshInstances(meshes, out unique, out instanced);
 		
 		if (instanced > 0)
-			LogInfo(string.Format("{0} duplicated meshes found and instanced. Total {1} unique meshes in the file.", instanced, unique));
+			LogInfo(string.Format("{0} duplicated meshes found and instanced. Total {1} unique meshes.", instanced, unique));
 		else
 			LogInfo("No instances found. All meshes are unique.");
 		}
@@ -477,7 +476,7 @@ public class EdysBlenderImporter : AssetPostprocessor
 					Object.DestroyImmediate(mf.sharedMesh);
 					mf.sharedMesh = meshes[key];
 					instanced++;
-					LogInfo(string.Format("Mesh: {0} is identical to: {1} (#{2})  Instance found!", mf.name, meshes[key].name, key.ToString("X8")));
+					// LogInfo(string.Format("Mesh: {0} is identical to: {1} (#{2})  Instance found!", mf.name, meshes[key].name, key.ToString("X8")));
 					}
 				else
 					{

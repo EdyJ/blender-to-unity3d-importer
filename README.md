@@ -1,9 +1,8 @@
-Blender to Unity 3D importer
+﻿Blender to Unity 3D importer
 ============================
 
 An advanced Blender model importer for Unity 3D
 
-Version: 1.01  
 By Angel García "Edy"  
 http://www.edy.es
 
@@ -38,14 +37,16 @@ The [importer] string allows additional parameters as keywords separated by a do
 	OPT				Optimize mesh usage. Ensure that the identical meshes are instanced instead of duplicated.
 					This optimization can also be applied later scene-wide (menu GameObject > "Optimize
 					mesh instances in this scene").
-	NOBLENDERFIX	Do not fix the Blender file. This is automatically applied with any 3D format
+	SKIPFIX			Do not fix the Blender file. This is automatically applied with any 3D format
 					other than Blender. OPT and NOMODS can still be used separately in other 3D formats.
+	FORCEFIX		Forces to apply the fix even in non-Blender files. This is useful with FBX files
+					exported from Blender.
 	NOMODS			Do not apply selective commands to meshes (see below).
 	
 	NOZFIX			Do not fix Z direction in .blend files. "Forward" should be Z+ in Unity (Y+ in Blender).
 	NOANIMFIX		Do not fix animation clips in .blend files when imported.
 	NOFLOATFIX		Do not fix floating point precision errors (i.e. rounding 0.9999998 to 1)
-	FORCEROOTFIX	Fixes an specific case of Blender file. See Known Issues below for details.
+	FORCEFIXROOT	Fixes an specific case of Blender file. See Known Issues below for details.
 
 #### Selective commands to meshes
 
@@ -75,6 +76,9 @@ Only the direct transform is imported by Unity.
 
 Alt-P clears the parent's inverse transform in a children when the parenthood was established with Ctrl-P.
 
+Please contact me if you have experience developing Blender Add-ons. I'd like add a function
+(maybe triggered by Shift-Alt-P?) for parenting objects like Unity does, without inverse transform.
+
 #### Rotations and transforms
 
 Unity applies Euler rotations in this order: ZXY
@@ -91,3 +95,11 @@ values will be different as result of the coordinate change (axis exchanged, etc
 
 Rotations are incorrectly imported when the Blender file contains a single Empty object as root for 
 all other objects. Use the FORCEROOTFIX option in this case.
+
+Animation clips are processed when imported in "Legacy - Store in Root" mode.
+
+Animations are somewhat smoothed after processed. This is because the quaterions in keyframes are
+fixed by converting them to and from Euler angles, which seems to break the quaternion continuity
+in the animation. The Unity function AnimationClip.EnsureQuaternionContinuity restores continuity, 
+but adds some smoothing to the rotations. Fixes for this issue are welcome (i.e. a method for 
+fixing the quaternions without breaking animation continuity).
