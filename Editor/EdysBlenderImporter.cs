@@ -21,7 +21,7 @@ public class EdysBlenderImporter : AssetPostprocessor
 	{
 	private bool m_fixBlender = true;
 	private bool m_optimize = false;
-	private bool m_zFix = true;
+	private bool m_zFix = false;
 	private bool m_animFix = true;
 	private bool m_floatFix = true;
 	private bool m_postMods = true;
@@ -57,7 +57,7 @@ public class EdysBlenderImporter : AssetPostprocessor
 				case "skipfix": m_fixBlender = false; break;
 				case "forcefix": m_fixBlender = true; break;
 				case "opt": m_optimize = true; break;
-				case "nozfix": m_zFix = false; break;
+				case "zfix": m_zFix = true; break;
 				case "noanimfix": m_animFix = false; break;
 				case "nofloatfix": m_floatFix = false; break;
 				case "nomods": m_postMods = false; break;
