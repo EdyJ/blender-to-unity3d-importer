@@ -33,7 +33,7 @@ The [importer] string allows additional parameters as keywords separated by a do
 
 	IMPORTER		Use importer. Otherwise bypass the file and let Unity import without changes.
 					This must be the first parameter. All others are optional.
-
+	
 	OPT				Optimize mesh usage. Ensure that the identical meshes are instanced instead of duplicated.
 					This optimization can also be applied later scene-wide (menu GameObject > "Optimize
 					mesh instances in this scene").
@@ -41,9 +41,10 @@ The [importer] string allows additional parameters as keywords separated by a do
 					other than Blender. OPT and NOMODS can still be used separately in other 3D formats.
 	FORCEFIX		Forces to apply the fix even in non-Blender files. This is useful with FBX files
 					exported from Blender.
-	NOMODS			Do not apply selective commands to meshes (see below).
+	ZFIX			Turn the model around 180º. Use when the "forward" direction of the model points
+					backwards (-Z). "Forward" should be +Z in Unity (-Y in Blender).
 	
-	NOZFIX			Do not fix Z direction in .blend files. "Forward" should be Z+ in Unity (Y+ in Blender).
+	NOMODS			Do not apply selective commands to meshes (see below).	
 	NOANIMFIX		Do not fix animation clips in .blend files when imported.
 	NOFLOATFIX		Do not fix floating point precision errors (i.e. rounding 0.9999998 to 1)
 	FORCEFIXROOT	Fixes an specific case of Blender file. See Known Issues below for details.
