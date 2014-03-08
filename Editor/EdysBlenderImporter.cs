@@ -21,7 +21,7 @@ public class EdysBlenderImporter : AssetPostprocessor
 	{
 	private bool m_fixBlender = true;
 	private bool m_optimize = false;
-	private bool m_zFix = false;
+	private bool m_zReverse = false;
 	private bool m_animFix = true;
 	private bool m_floatFix = true;
 	private bool m_postMods = true;
@@ -57,7 +57,7 @@ public class EdysBlenderImporter : AssetPostprocessor
 				case "skipfix": m_fixBlender = false; break;
 				case "forcefix": m_fixBlender = true; break;
 				case "opt": m_optimize = true; break;
-				case "zfix": m_zFix = true; break;
+				case "zreverse": m_zReverse = true; break;
 				case "noanimfix": m_animFix = false; break;
 				case "nofloatfix": m_floatFix = false; break;
 				case "nomods": m_postMods = false; break;
@@ -196,7 +196,7 @@ public class EdysBlenderImporter : AssetPostprocessor
 
 		// Turn the model around so the +Z axis = forward (in Blender +Y = forward)
 		
-		if (m_zFix)
+		if (m_zReverse)
 			{
 			Quaternion q = Quaternion.AngleAxis(180.0f, Vector3.up);
 			go.transform.localPosition = q * go.transform.localPosition;
@@ -220,7 +220,7 @@ public class EdysBlenderImporter : AssetPostprocessor
 		// 2nd level and below object: adjust local position and rotate the object
 		
 		Quaternion q = Quaternion.AngleAxis(-90.0f, Vector3.right);
-		if (m_zFix) q = Quaternion.AngleAxis(180.0f, Vector3.up) * q;
+		if (m_zReverse) q = Quaternion.AngleAxis(180.0f, Vector3.up) * q;
 
 		foreach (Transform child in go.transform)
 			{
@@ -230,7 +230,7 @@ public class EdysBlenderImporter : AssetPostprocessor
 			// Convert rotation and scale from Blender (Right-handed) to Unity (Left-handed)
 			
 			ConvertRotation(child);
-			if (m_zFix) RotationFix180(child);
+			if (m_zReverse) RotationFix180(child);
 			ConvertScale(child);
 			
 			// Postprocess
@@ -669,7 +669,7 @@ public class EdysBlenderImporter : AssetPostprocessor
 			
 			// If the model has been turned around (180º) then invert the rotations around the Y axis
 			
-			if (m_zFix)
+			if (m_zReverse)
 				{
 				euler.x = -euler.x;
 				euler.z = -euler.z;
@@ -739,7 +739,7 @@ public class EdysBlenderImporter : AssetPostprocessor
 			
 			if (isFirstLevel)
 				{
-				if (m_zFix)
+				if (m_zReverse)
 					{
 					// Turn around the local position
 					
@@ -757,7 +757,7 @@ public class EdysBlenderImporter : AssetPostprocessor
 				// has been applied to 1st level.
 				
 				Quaternion q = Quaternion.AngleAxis(-90.0f, Vector3.right);
-				if (m_zFix) q = Quaternion.AngleAxis(180.0f, Vector3.up) * q;
+				if (m_zReverse) q = Quaternion.AngleAxis(180.0f, Vector3.up) * q;
 				pos = q * pos;
 				
 				// Adjust the tangents of the Y and Z curves as result of the rotation X-90
@@ -772,7 +772,7 @@ public class EdysBlenderImporter : AssetPostprocessor
 				// If the model has been turned around (180º) the tangents for X and Z position
 				// curves must be inverted as well.
 				
-				if (m_zFix)
+				if (m_zReverse)
 					{
 					InvertTangents(ref keysX[k]);
 					InvertTangents(ref keysZ[k]);

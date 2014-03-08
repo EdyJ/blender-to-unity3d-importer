@@ -26,23 +26,24 @@ Right-click the file or folder, then choose Reimport to apply new settings after
 
 The [importer] string allows additional parameters as keywords separated by a dot (.):
 
-	[importer]		  		    (use default settings)
-	[importer.opt.nozfix]       (optional parameters are applied)
-	
+	[importer]					(use default settings)
+	[importer.opt.zreverse]		(optional parameters are applied)
+
 **Parameters:**
 
 	IMPORTER		Use importer. Otherwise bypass the file and let Unity import without changes.
 					This must be the first parameter. All others are optional.
 	
-	OPT				Optimize mesh usage. Ensure that the identical meshes are instanced instead of duplicated.
-					This optimization can also be applied later scene-wide (menu GameObject > "Optimize
-					mesh instances in this scene").
+	OPT				Optimize mesh usage. Ensure that the identical meshes are instanced instead of 
+					duplicated.	This optimization can also be applied later scene-wide (menu 
+					GameObject > "Optimize mesh instances in this scene").
 	SKIPFIX			Do not fix the Blender file. This is automatically applied with any 3D format
 					other than Blender. OPT and NOMODS can still be used separately in other 3D formats.
 	FORCEFIX		Forces to apply the fix even in non-Blender files. This is useful with FBX files
 					exported from Blender.
-	ZFIX			Turn the model around 180º. Use when the "forward" direction of the model points
-					backwards (-Z). "Forward" should be +Z in Unity (-Y in Blender).
+	ZREVERSE		Turn the model around 180º when importing so the Z axis points the opposite 
+					direction. Use when the "forward" direction of the model points	backwards (-Z).
+					"Forward" should be +Z in Unity (-Y in Blender).
 	
 	NOMODS			Do not apply selective commands to meshes (see below).	
 	NOANIMFIX		Do not fix animation clips in .blend files when imported.
@@ -63,9 +64,9 @@ any other character or separator.
 
 **Mesh commands:**
 
-	NOREND		Remove the Mesh Renderer
-	COLL		Add a Mesh Collider
-	COLLCONV	Add a Mesh Collider and mark it as Convex
+	NOREND			Remove the Mesh Renderer
+	COLL			Add a Mesh Collider
+	COLLCONV		Add a Mesh Collider and mark it as Convex
 
 ### Hints & Tips
 
@@ -95,12 +96,12 @@ values will be different as result of the coordinate change (axis exchanged, etc
 ### Known issues
 
 Rotations are incorrectly imported when the Blender file contains a single Empty object as root for 
-all other objects. Use the FORCEROOTFIX option in this case.
+all other objects. Use the FORCEFIXROOT option in this case.
 
 Animation clips are processed when imported in "Legacy - Store in Root" mode.
 
 Animations are somewhat smoothed after processed. This is because the quaterions in keyframes are
 fixed by converting them to and from Euler angles, which seems to break the quaternion continuity
-in the animation. The Unity function AnimationClip.EnsureQuaternionContinuity restores continuity, 
+in the animation. The Unity function AnimationClip.EnsureQuaternionContinuity() restores continuity, 
 but adds some smoothing to the rotations. Fixes for this issue are welcome (i.e. a method for 
 fixing the quaternions without breaking animation continuity).
