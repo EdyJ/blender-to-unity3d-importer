@@ -276,10 +276,6 @@ public class EdysBlenderImporter : AssetPostprocessor
 					ProcessClipPosition(clip, objectName);
 					ProcessClipScale(clip, objectName);
 					}
-				
-				// Ensure that the quaternion-based animations produce the correct rotations
-				
-				clip.EnsureQuaternionContinuity();
 				}
 			}
 		}
@@ -386,29 +382,17 @@ public class EdysBlenderImporter : AssetPostprocessor
 		
 	static void ConvertRotation (Transform t)
 		{
-		t.localRotation = Quaternion.Inverse(t.localRotation);
-		
-		Vector3 localEulerAngles = t.localEulerAngles;
-		
-		float eulerY = localEulerAngles.y;		
-		localEulerAngles.x = -localEulerAngles.x;
-		localEulerAngles.y = -localEulerAngles.z;
-		localEulerAngles.z = eulerY;
-		
-		t.localEulerAngles = localEulerAngles;
+		Quaternion q = t.localRotation;		
+		t.localRotation = new Quaternion(-q.x, -q.z, q.y, -q.w);
 		}
 		
 		
 	static void RotationFix180 (Transform t)
 		{
-		Vector3 localEulerAngles = t.localEulerAngles;		
-		
-		localEulerAngles.x = -localEulerAngles.x;
-		localEulerAngles.z = -localEulerAngles.z;
-		
-		t.localEulerAngles = localEulerAngles;
+		Quaternion q = t.localRotation;		
+		t.localRotation = new Quaternion(-q.x, q.y, -q.z, q.w);
 		}
-		
+
 		
 	static void ConvertScale (Transform t)
 		{
@@ -647,40 +631,76 @@ public class EdysBlenderImporter : AssetPostprocessor
 		Keyframe[] keysZ = curveZ.keys;
 		Keyframe[] keysW = curveW.keys;
 		
+		float s45 = Mathf.Sin(Mathf.PI/4.0f);
+				
 		for (int k=0; k<keyframes; k++)
 			{
 			Quaternion rot = new Quaternion(keysX[k].value, keysY[k].value, keysZ[k].value, keysW[k].value);
 			
-			// Convert rotation and scale from Blender (Right-handed) to Unity (Left-handed).
-			// Also fix the -90 rotation in the first level objects.
+			// Convert rotation from Blender (Right-handed) to Unity (Left-handed).
+			// Must have in mind the X+90 rotation in the first level objects.
 			
 			if (isFirstLevel)
-				rot = Quaternion.Inverse(rot) * Quaternion.AngleAxis(-90.0f, Vector3.right);
-			else
-				rot = Quaternion.Inverse(rot);
+				{
+				// This is the same as rot = rot * Quaternion.AngleAxis(90.0f, Vector3.right);
+				// Idea courtesy of apatriarca (www.gamedev.net/topic/654682-quaternions-convert-between-left-right-handed-without-using-euler/)
 				
-			// Rename and invert the axis. This is done via Euler.
-			
-			Vector3 euler = rot.eulerAngles;
-			float eulerY = euler.y;
-			euler.x = -euler.x;
-			euler.y = -euler.z;
-			euler.z = eulerY;
-			
-			// If the model has been turned around (180º) then invert the rotations around the Y axis
-			
+				keysX[k].value = (rot.w + rot.x) * s45;
+				keysY[k].value = (rot.y + rot.z) * s45;
+				keysZ[k].value = (rot.z - rot.y) * s45;
+				keysW[k].value = (rot.w - rot.x) * s45;
+				
+				// Perform the same operation with tangents
+				
+				float inTx = (keysW[k].inTangent + keysX[k].inTangent) * s45;
+				float inTy = (keysY[k].inTangent + keysZ[k].inTangent) * s45;
+				float inTz = (keysZ[k].inTangent - keysY[k].inTangent) * s45;
+				float inTw = (keysW[k].inTangent - keysX[k].inTangent) * s45;
+				float outTx = (keysW[k].outTangent + keysX[k].outTangent) * s45;
+				float outTy = (keysY[k].outTangent + keysZ[k].outTangent) * s45;
+				float outTz = (keysZ[k].outTangent - keysY[k].outTangent) * s45;
+				float outTw = (keysW[k].outTangent - keysX[k].outTangent) * s45;
+				
+				keysX[k].inTangent = inTx;
+				keysY[k].inTangent = inTy;
+				keysZ[k].inTangent = inTz;
+				keysW[k].inTangent = inTw;
+				keysX[k].outTangent = outTx;
+				keysY[k].outTangent = outTy;
+				keysZ[k].outTangent = outTz;
+				keysW[k].outTangent = outTw;
+				}
+			else
+				{
+				// Convert the rotation from Blender to Unity 
+				
+				keysX[k].value = -rot.x;
+				keysY[k].value = -rot.z;
+				keysZ[k].value = rot.y;
+				keysW[k].value = -rot.w;
+				
+				// Adjust and exchange tangents accordingly
+				
+				InvertTangents(ref keysX[k]);
+				InvertTangents(ref keysW[k]);
+				float inT = keysY[k].inTangent;
+				float outT = keysY[k].outTangent;
+				keysY[k].inTangent = -keysZ[k].inTangent;
+				keysY[k].outTangent = -keysZ[k].outTangent;
+				keysZ[k].inTangent = inT;
+				keysZ[k].outTangent = outT;
+				}
+				
+			// Turn around the forward axis if required
+				
 			if (m_zReverse)
 				{
-				euler.x = -euler.x;
-				euler.z = -euler.z;
+				keysX[k].value = -keysX[k].value;
+				keysZ[k].value = -keysZ[k].value;
+				
+				InvertTangents(ref keysX[k]);
+				InvertTangents(ref keysZ[k]);
 				}
-			
-			rot = Quaternion.Euler(euler);
-			
-			keysX[k].value = rot.x;
-			keysY[k].value = rot.y;
-			keysZ[k].value = rot.z;
-			keysW[k].value = rot.w;
 			}
 			
 		// Assign the fixed keyframes back to the rotation curves

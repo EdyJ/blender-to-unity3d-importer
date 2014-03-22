@@ -3,7 +3,7 @@
 
 An advanced Blender model importer for Unity 3D
 
-By Angel García "Edy"  
+By Angel García "Edy"
 http://www.edy.es
 
 ### Setting up
@@ -48,7 +48,8 @@ The [importer] string allows additional parameters as keywords separated by a do
 	NOMODS			Do not apply selective commands to meshes (see below).	
 	NOANIMFIX		Do not fix animation clips in .blend files when imported.
 	NOFLOATFIX		Do not fix floating point precision errors (i.e. rounding 0.9999998 to 1)
-	FORCEFIXROOT	Fixes an specific case of Blender file. See Known Issues below for details.
+	FORCEFIXROOT	Fixes an specific case of Blender file consisting on a single Empty object
+					as root of all other objects. See Known Issues below for details.
 
 #### Selective commands to meshes
 
@@ -99,9 +100,3 @@ Rotations are incorrectly imported when the Blender file contains a single Empty
 all other objects. Use the FORCEFIXROOT option in this case.
 
 Animation clips are processed when imported in "Legacy - Store in Root" mode.
-
-Animations are somewhat smoothed after processed. This is because the quaterions in keyframes are
-fixed by converting them to and from Euler angles, which seems to break the quaternion continuity
-in the animation. The Unity function AnimationClip.EnsureQuaternionContinuity() restores continuity, 
-but adds some smoothing to the rotations. Fixes for this issue are welcome (i.e. a method for 
-fixing the quaternions without breaking animation continuity).
