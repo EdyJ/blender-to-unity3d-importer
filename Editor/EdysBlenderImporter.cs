@@ -711,19 +711,19 @@ public class EdysBlenderImporter : AssetPostprocessor
 		Keyframe[] keysZ = curveZ.keys;
 		Keyframe[] keysW = curveW.keys;
 
+		float s45 = Mathf.Sin(Mathf.PI/4.0f);
+
 		for (int k=0; k<keyframes; k++)
 			{
 			Quaternion rot = new Quaternion(keysX[k].value, keysY[k].value, keysZ[k].value, keysW[k].value);
 
 			// Convert rotation from Blender (Right-handed) to Unity (Left-handed).
-			// Must have in mind the -90 rotation in the first level objects.
+			// Must have in mind the X+90 rotation in the first level objects.
 
 			if (isFirstLevel)
 				{
 				// This is the same as rot = rot * Quaternion.AngleAxis(90.0f, Vector3.right);
 				// Idea courtesy of apatriarca (www.gamedev.net/topic/654682-quaternions-convert-between-left-right-handed-without-using-euler/)
-
-				float s45 = Mathf.Sin(Mathf.PI/4.0f);
 
 				keysX[k].value = (rot.w + rot.x) * s45;
 				keysY[k].value = (rot.y + rot.z) * s45;
