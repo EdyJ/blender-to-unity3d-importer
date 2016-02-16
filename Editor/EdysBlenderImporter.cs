@@ -600,8 +600,10 @@ public class EdysBlenderImporter : AssetPostprocessor
 		//speed up math by copying the mesh arrays
 		int[] triangles = mesh.triangles;
 		Vector3[] vertices = mesh.vertices;
-		Vector2[] uv = mesh.uv;
 		Vector3[] normals = mesh.normals;
+		Vector2[] uv = mesh.uv;
+
+		bool hasUVs = uv.Length > 0;
 
 		//variable definitions
 		int triangleCount = triangles.Length;
@@ -622,9 +624,16 @@ public class EdysBlenderImporter : AssetPostprocessor
 			Vector3 v2 = vertices[i2];
 			Vector3 v3 = vertices[i3];
 
-			Vector2 w1 = uv[i1];
-			Vector2 w2 = uv[i2];
-			Vector2 w3 = uv[i3];
+			Vector2 w1 = Vector2.zero;
+			Vector2 w2 = Vector2.zero;
+			Vector2 w3 = Vector2.zero;
+
+			if (hasUVs)
+				{
+				w1 = uv[i1];
+				w2 = uv[i2];
+				w3 = uv[i3];
+				}
 
 			float x1 = v2.x - v1.x;
 			float x2 = v3.x - v1.x;
