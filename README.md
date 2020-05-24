@@ -3,8 +3,11 @@
 
 An advanced Blender model importer for Unity 3D
 
-By Angel García "Edy"
-http://www.edy.es
+**IMPORTANT: This project has been superseded by the Blender To Unity FBX Exporter add-on for Blender:**<br>
+**https://github.com/EdyJ/blender-to-unity-fbx-exporter**
+
+By Angel García "Edy"<br>
+https://www.edy.es
 
 ### Setting up
 
